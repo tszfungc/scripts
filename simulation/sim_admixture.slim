@@ -1,0 +1,46 @@
+// Shell command: slim -m -d "N=<number of generation since admixture begins>" -d "ints='<input tree sequence>'" -d "outts='<input tree sequence>'" sim_admixture.slim
+// set up a simple neutral simulation
+initialize() {
+	initializeTreeSeq();
+	initializeMutationRate(0.0);
+	
+	// m1 mutation type: neutral
+	initializeMutationType("m1", 0.5, "f", 0.0);
+	
+	// g1 genomic element type: uses m1 for all mutations
+	initializeGenomicElementType("g1", m1, 1.0);
+	
+	// uniform chromosome of length 250M bp  with uniform recombination rate 1e-8 crossover per bp per generation
+	initializeGenomicElement(g1, 0, 25e7-1);
+	initializeRecombinationRate(1e-8);
+}
+
+// Admixture starts here
+1 late(){
+    sim.readFromPopulationFile(ints);
+    
+    print(p0.individualCount);
+    print(p1.individualCount);
+    print(p2.individualCount);
+    
+    sim.treeSeqRememberIndividuals(sim.subpopulations.individuals);
+    sim.addSubpop("p3", 1000);
+    p3.setMigrationRates(c(p0, p1), c(0.8, 0.2));
+}
+
+2 late(){
+    p3.setMigrationRates(c(p0, p1), c(0.0, 0.0));
+    
+    p0.setSubpopulationSize(0);
+    p1.setSubpopulationSize(0);
+    p2.setSubpopulationSize(0);
+}
+
+s1 10000 late(){
+    sim.treeSeqOutput(outts);
+    sim.simulationFinished();
+}
+
+1 late(){
+    sim.rescheduleScriptBlock(s1, start=N, end=N);
+}
