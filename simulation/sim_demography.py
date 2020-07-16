@@ -1,23 +1,31 @@
+"""Output tree sequence
+function out_of_africa was copied from user manual of msprime.
+Parameters updated according to Gravel 2011. Table 2.
+Numbers in the comments are the original parameters in Gutenkunst 2009 Table 1.
+
+| ID | Pop | Description      |
+|----|-----|------------------|
+| 0  | YRI | 1000 Genomes YRI |
+| 1  | CEU | 1000 Genomes CEU |
+| 2  | CHB | 1000 Genomes CHB |
+
+Changes
+-------
+03 06 2020:
+    Removed migration between African and European before the split
+"""
+
 import msprime
-import pyslim
 import math
 import sys
 import argparse
 
 parser = argparse.ArgumentParser(description="Simulate YRI, CEU and CHB populations and output as tskit's tree saequence format")
 parser.add_argument("out",help="Output filename")
-parser.add_argument("sample_n_AF",help="Sample size of YRI")
-parser.add_argument("sample_n_EU",help="Sample size of CEU")
-parser.add_argument("sample_n_AS",help="Sample size of CHB")
+parser.add_argument("sample_n_AF",help="Sample size of YRI", type=int)
+parser.add_argument("sample_n_EU",help="Sample size of CEU", type=int)
+parser.add_argument("sample_n_AS",help="Sample size of CHB", type=int)
 args = parser.parse_args()
-
-"""Output tree sequence
-function out_of_africa was copied from user manual of msprime.
-Parameters updated according to Gravel 2011. Table 2.
-Numbers in the comments are the original parameters in Gutenkunst 2009 Table 1..
-
-length (genome), recombination_rate and mutation_rate should be set in the return line of out_of_africa. I left mutation_rate empty because I use the output for forward simulation in SLiM and add mutations after that. If you only use msprime, please modify the return line and choose which object to dump
-"""
 
 def out_of_africa(sample_n_AF, sample_n_EU, sample_n_AS):
     # First we set out the maximum likelihood values of the various parameters
@@ -74,6 +82,7 @@ def out_of_africa(sample_n_AF, sample_n_EU, sample_n_AS):
         # Population B merges into YRI at T_B
         msprime.MassMigration(
             time=T_B, source=1, destination=0, proportion=1.0),
+        msprime.MigrationRateChange(time=T_B, rate=0), ## Missing in the old tutorial. update 03 06 2020
         # Size changes to N_A at T_AF
         msprime.PopulationParametersChange(
             time=T_AF, initial_size=N_A, population_id=0)
@@ -93,14 +102,14 @@ def out_of_africa(sample_n_AF, sample_n_EU, sample_n_AS):
         demographic_events=demographic_events,
         length=2.5e8,
         recombination_rate=1e-8,
-        mutation_rate=0
+        mutation_rate=1.25e-8
     )
 
-outofafrica_tree = out_of_africa(arg.sample_n_AF, arg.sample_n_EU, arg.sample_n_AS)
+outofafrica_tree = out_of_africa(args.sample_n_AF, args.sample_n_EU, args.sample_n_AS)
 # If you want msprime tree sequence
-#outofafrica_tree.dump(arg.out)
+outofafrica_tree.dump(args.out)
 
 # If your analysis is followed by SLiM
-new_outofafrica_tree = pyslim.annotate_defaults(outofafrica_tree, model_type="WF", slim_generation=1)
-new_outofafrica_tree.dump(arg.out)
+#new_outofafrica_tree = pyslim.annotate_defaults(outofafrica_tree, model_type="WF", slim_generation=1)
+#new_outofafrica_tree.dump(arg.out)
 
