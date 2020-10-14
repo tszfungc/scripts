@@ -191,7 +191,7 @@ SN      0       number of multiallelic SNP sites:       0
 # similar to above. Except for mutation_rate=0
 python sim_demography_preadmix.py AA_ancestor.ts 2000 2000 10
 
-# 2. SLiM admixture 80% Euro+20% Afr for 10 generations
+# 2. SLiM admixture 80% Afr+20% Euro for 10 generations
 slim -m -d "N=10" -d "ints='AA_ancestor.ts'" -d "outts='admixture.ts'" -d "NUM_AA=1000" sim_admixture.slim
 
 # 3. Add mutations to the tree sequence. 
