@@ -184,5 +184,20 @@ SN      0       number of multiallelic SNP sites:       0
 ```
 
 
+# Simulate European+African, simulate African American, add mutations
+
+```
+# 1. msprime simulate 1000 European, 1000 African, 5 Asian
+# similar to above. Except for mutation_rate=0
+python sim_demography_preadmix.py AA_ancestor.ts 2000 2000 10
+
+# 2. SLiM admixture 80% Euro+20% Afr for 10 generations
+slim -m -d "N=10" -d "ints='demographic.ts'" -d "outts='admixture.ts'" -d "NUM_AA=1000" sim_admixture.slim
+
+# 3. Add mutations to the tree sequence. 
+# <Input tree sequence> <output prefix> <number of admixed individuals>
+python mutate_tree.py admixture.ts admixture_mutate 1000
+```
+
 
 
