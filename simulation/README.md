@@ -199,5 +199,11 @@ slim -m -d "N=10" -d "ints='AA_ancestor.ts'" -d "outts='admixture.ts'" -d "NUM_A
 python mutate_tree.py admixture.ts admixture_mutate 1000
 ```
 
+# simulate African American in msprime
+
+```
+msprime simulate 200 European, 100 African, 5 Asian, 5000 African-American
+python sim_demography_scale.py AA_ancestor.ts 400 200 10 10000
+```
 
 
